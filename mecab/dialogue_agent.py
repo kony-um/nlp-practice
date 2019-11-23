@@ -4,6 +4,7 @@ import MeCab
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
 
 class DialogueAgent:
     def __init__(self):
@@ -22,18 +23,17 @@ class DialogueAgent:
         return tokens
 
     def train(self, texts, labels):
-        vectorizer = CountVectorizer(tokenizer=self._tokenize)
-        bow = vectorizer.fit_transform(texts)
+        pipeline = Pipeline([
+            ('vectorizer', CountVectorizer(tokenizer=self._tokenize)),
+            ('classifier', SVC())
+        ])
 
-        classifier = SVC()
-        classifier.fit(bow, labels)
+        pipeline.fit(texts, labels)
 
-        self.vectorizer = vectorizer
-        self.classifier = classifier
+        self.pipeline = pipeline
     
     def predict(self, texts):
-        bow = self.vectorizer.transform(texts)
-        return self.classifier.predict(bow)
+        return self.pipeline.predict(texts)
 
 if __name__ == '__main__':
     BASE_DIR = normpath(dirname(__file__))
